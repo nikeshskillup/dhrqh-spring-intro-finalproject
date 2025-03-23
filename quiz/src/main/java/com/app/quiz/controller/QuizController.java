@@ -38,12 +38,6 @@ public class QuizController {
 	    // Get the authenticated user's details
 	    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-	    // // Check if the user is authenticated
-	    // if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
-	    //     // Redirect to the login page if the user is not authenticated
-	    //     return "redirect:/login";
-	    // }
-
 	    // Get the username
 	    String username = authentication.getName();
 	    model.addAttribute("username", username);
