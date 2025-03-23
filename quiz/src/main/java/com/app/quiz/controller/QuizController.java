@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -39,11 +38,11 @@ public class QuizController {
 	    // Get the authenticated user's details
 	    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-	    // Check if the user is authenticated
-	    if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
-	        // Redirect to the login page if the user is not authenticated
-	        return "redirect:/login";
-	    }
+	    // // Check if the user is authenticated
+	    // if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
+	    //     // Redirect to the login page if the user is not authenticated
+	    //     return "redirect:/login";
+	    // }
 
 	    // Get the username
 	    String username = authentication.getName();
@@ -73,12 +72,42 @@ public class QuizController {
 	    }
 	}
 
-	//Add get mapping for the login page
+	@GetMapping("/login")
+    public String login() {
+        return "login"; // Returns the login.html template
+    }
 
-	//Add get mapping for the register page
+	@GetMapping("/register")
+    public String register() {
+        return "register"; // Returns the register.html template
+    }
 
-	//Add post mapping to handle registration
+	// POST endpoint to handle user registration and auto-login
+	@PostMapping("/register")
+	public String registerUser(
+			@RequestParam String username, // Username from the form
+			@RequestParam String password, // Password from the form
+			@RequestParam String role // Role from the form
+	) {
+		// Register the user by storing their details in the HashMap
+		try {
+			userDetailsService.registerUser(username, password, role);
+		} catch (Exception userExistsAlready) {
+			// Redirect to the /register endpoint
+			return "redirect:/register?error";
+		}
 
+		// Authenticate the user programmatically
+		Authentication authentication = authenticationManager.authenticate(
+			new UsernamePasswordAuthenticationToken(username, password)
+		);
+
+		// Set the authentication in the SecurityContext
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		// Redirect to the /login endpoint
+		return "redirect:/login?success";
+	}	
 
 	@GetMapping("/addQuiz")
     public String showAddQuizForm(Model model) {
@@ -87,12 +116,6 @@ public class QuizController {
     }
 	@PostMapping("/addQuiz")
 	public String addQuiz(@ModelAttribute Quiz quiz, Model model, Authentication authentication) {
-	    // Check if the user is authenticated
-	    if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
-	        // Redirect to the login page if the user is not authenticated
-	        return "redirect:/login";
-	    }
-
 	    // Get the user's role
 	    String role = authentication.getAuthorities().stream()
 	        .map(GrantedAuthority::getAuthority)
@@ -137,12 +160,6 @@ public class QuizController {
 	    // Get the authenticated user's details
 	    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-	    // Check if the user is authenticated
-	    if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
-	        // Redirect to the login page if the user is not authenticated
-	        return "redirect:/login";
-	    }
-
 	    // Get the user's role
 	    String role = authentication.getAuthorities().stream()
 	        .map(GrantedAuthority::getAuthority)
@@ -165,13 +182,7 @@ public class QuizController {
 	public String deleteQuiz(@PathVariable("id") int id, Model model) {
 		// Get the authenticated user's details
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-	
-		// Check if the user is authenticated
-		if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
-			// Redirect to the login page if the user is not authenticated
-			return "redirect:/login";
-		}
-	
+		
 		// Get the user's role
 		String role = authentication.getAuthorities().stream()
 			.map(GrantedAuthority::getAuthority)
