@@ -1,4 +1,5 @@
 com/app/quiz/service/QuizUserDetailsService.class
+com/app/quiz/model/Question.class
 com/app/quiz/config/WebSecurityConfig.class
 com/app/quiz/QuizApplication.class
 com/app/quiz/controller/QuizController.class
